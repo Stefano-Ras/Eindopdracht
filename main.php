@@ -1,15 +1,76 @@
-<!--
-    Region:
-    - American  American cuisine is generally a type of fusion cuisine which
-                assimilates flavors from the melting pot of traditional American cooking techniques
-                mixed with foreign and sometimes molecular gastronomy components.
-    - Asian     Asian cuisine is local, authentic, and traditional.
-                It is rich in flavor and taste from the herbs and spices used in the preparations.
-                Asian cuisine features multicultural dishes from diverse cultures and origins
-                from southeast Asia, Europe, America, and around the globe.
-    - Dutch     Dutch food fucking sucks. Choose something else.
-    - European  The European cuisine includes a wide use of meat ranging from poultry to cattle,
-                sheep, pork and varied game. There are an infinite number of dairy products such as yogurt,
-                soft and hard cheeses. In coastal areas, all kinds of fish are present because
-                the European coasts are bathed by the main oceans and inland seas.
--->
+<html>
+    <body style="width:75%;margin-top:25px;margin-bottom:25px;margin-left:auto;margin-right:auto;">
+        <div>
+            <form action="" method="post">
+                <?php
+                    include("connect.php");
+                    
+    
+                    $conn = new mysqli("localhost", "root", "", "recipe");
+                    if ($conn->connect_error) {
+                        # Display an error mesage if the connection fails
+                        die("Connection failed: " . $conn->connect_error);
+                    }
+                /* 
+                    $region = $conn->prepare("SELECT * FROM region");
+                    $region = $conn->prepare("INSERT INTO region (Name, Description) VALUES (?, ?, ?)");
+                    $region->bind_param("userregion", $Name, $Description);
+
+                    file_put_contents("./recipe.json", json_encode($region));
+                */
+                    //SELECT * FROM region WHERE Name = filtered name
+                    $regionResult = $db("SELECT DISTINCT Region FROM Recipe ORDER BY Name ASC");
+                    //$sql = "SELECT * FROM region;";
+                    ?>
+                    <div class="search-box">
+                        <select id="region" name="region[]">
+                            <option value="0" selected="selected">Select region</option>
+                            <?php
+                                if (! empty($regionResult)) {
+                                     foreach ($regionResult as $key => $value) {
+                                         echo '<option value="' . $regionResult[$key]['Region'] . '">' . $regionResult[$key]['Region'] . '</option>';
+                                     }
+                                 }
+                            ?>
+                        </select>
+                        <button id="filter">Search</button>
+                    </div>
+                <?php
+                    $sql = "SELECT * FROM region;";
+                    $result = $conn->query($sql);
+                    $resultCheck = mysqli_num_rows($result);
+                    if($resultCheck > 0) {
+                        while($row = $result->fetch_assoc()) {
+                            echo $row['Name'] . "<br>" . $row['Description'] . "<br><br>";
+                        }
+                    }
+
+                    $sqlIngredients = "SELECT * FROM ingredients;";
+                    $resultIngredients = mysqli_query($conn, $sqlIngredients);
+                    $resultCheckIngredients = mysqli_num_rows($resultIngredients);
+                    if($resultCheckIngredients > 0) {
+                        while($row = mysqli_fetch_assoc($resultIngredients)) {
+                            echo $row['Amount'] . " " . $row['Unit'] . " " . $row['Name'] . "<br><br>";
+                        }
+                    }
+
+                    $sqlRecipe = "SELECT * FROM recipe;";
+                    $resultRecipe = mysqli_query($conn, $sqlRecipe);
+                    $resultCheckRecipe = mysqli_num_rows($resultRecipe);
+                    if($resultCheckRecipe > 0) {
+                        while($row = mysqli_fetch_assoc($resultRecipe)) {
+                            echo $row['Name'] . "<br><br>" . $row['Description'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><br>";
+                        }
+                    }
+
+                    //Join recipe & ingredients tables
+                    //Show Recipe Name, Description, Story / Ingredients Amount, Unit, Name
+
+                ?>
+            </form>
+        </div>
+    </body>
+</html>
+<?php
+    $conn->close();
+?>
