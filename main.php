@@ -61,7 +61,7 @@
                         } */
                     }
 
-                    $stmt = $conn->prepare("SELECT * FROM recipe JOIN region ON recipe.regionId = region.ID WHERE regionId = ?");
+                    $stmt = $conn->prepare("SELECT region.Description AS regionDescription, recipe.Name, recipe.Description AS recipeDescription, recipe.Instructions, recipe.Life_Story FROM recipe JOIN region ON recipe.regionId = region.ID WHERE regionId = ?");
                     $stmt->bind_param("i", $regionId);
                     $stmt->execute();
                     $resultRecipe = $stmt->get_result();
@@ -69,7 +69,7 @@
                     $resultCheckRecipe = mysqli_num_rows($resultRecipe);
                     if($resultCheckRecipe > 0) {
                         while($row = mysqli_fetch_assoc($resultRecipe)) {
-                            echo "<span='title'>" . $row['Name'] . "</span><br><br>" . $row['Description'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><hr/>";
+                            echo "<span='title'>" . $row['Name'] . "</span><br><br>" . $row['recipeDescription'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><hr/>";
                         }
                     }
                     
