@@ -34,6 +34,12 @@
                         <button id="filter">Search</button>
                     </div> -->
                 <?php
+                    if(isset($_GET["selectRegion"])) {
+                        $regionId = $_GET["selectRegion"];
+                    } else {
+                        $regionId = 0;
+                    }
+
                     $stmt = $conn->prepare("INSERT INTO region (ID, Name, Description) VALUES (?, ?, ?)");
                     $stmt->bind_param("iss", $ID, $Name, $Description);
                     
@@ -44,17 +50,22 @@
                     if($resultCheck > 0) {
                         echo "<select class='selection' name='selectRegion'>";
                         while($row = $result->fetch_assoc()) {
-                            echo "<option  value='$row[ID]'>" . $row['Name'] . "</option>";
+                            echo "<option value='$row[ID]'";
+                            echo $row['ID'] == $regionId ? " selected" : "";
+                            echo ">" . $row['Name'] . "</option>";
                         }
                         echo "</select>";
-                        echo "<input type='button' value='submit'>";
-                        while($row1 = $result1->fetch_assoc()) {
+                        echo "<input type='submit' value='submit'>";
+                       /*  while($row1 = $result1->fetch_assoc()) {
                             echo $row1['Description'] . "<br/><hr/>";
-                        }
+                        } */
                     }
 
-                    $sqlRecipe = "SELECT * FROM recipe;";
-                    $resultRecipe = mysqli_query($conn, $sqlRecipe);
+                    $stmt = $conn->prepare("SELECT * FROM recipe JOIN region ON recipe.regionId = region.ID WHERE regionId = ?");
+                    $stmt->bind_param("i", $regionId);
+                    $stmt->execute();
+                    $resultRecipe = $stmt->get_result();
+                    print_r($resultRecipe);
                     $resultCheckRecipe = mysqli_num_rows($resultRecipe);
                     if($resultCheckRecipe > 0) {
                         while($row = mysqli_fetch_assoc($resultRecipe)) {
