@@ -1,7 +1,7 @@
 <html>
     <body>
         <div>
-            <form action="" method="post">
+            <form action="main.php" method="get">
                 <?php
                     include("connect.php");
                     $conn = new mysqli("localhost", "root", "", "recipe");
@@ -42,11 +42,12 @@
                     $result1 = $conn->query($sql);
                     $resultCheck = mysqli_num_rows($result);
                     if($resultCheck > 0) {
-                        echo "<select class='selection'>";
+                        echo "<select class='selection' name='selectRegion'>";
                         while($row = $result->fetch_assoc()) {
                             echo "<option  value='$row[ID]'>" . $row['Name'] . "</option>";
                         }
                         echo "</select>";
+                        echo "<input type='button' value='submit'>";
                         while($row1 = $result1->fetch_assoc()) {
                             echo $row1['Description'] . "<br/><hr/>";
                         }
