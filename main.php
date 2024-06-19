@@ -1,11 +1,9 @@
 <html>
-    <body style="width:75%;margin-top:25px;margin-bottom:25px;margin-left:auto;margin-right:auto;">
+    <body>
         <div>
             <form action="" method="post">
                 <?php
                     include("connect.php");
-                    
-    
                     $conn = new mysqli("localhost", "root", "", "recipe");
                     if ($conn->connect_error) {
                         # Display an error mesage if the connection fails
@@ -36,15 +34,22 @@
                         <button id="filter">Search</button>
                     </div> -->
                 <?php
+                    $stmt = $conn->prepare("INSERT INTO region (ID, Name, Description) VALUES (?, ?, ?)");
+                    $stmt->bind_param("iss", $ID, $Name, $Description);
+                    
                     $sql = "SELECT * FROM region;";
                     $result = $conn->query($sql);
+                    $result1 = $conn->query($sql);
                     $resultCheck = mysqli_num_rows($result);
                     if($resultCheck > 0) {
                         echo "<select class='selection'>";
                         while($row = $result->fetch_assoc()) {
-                            echo "<option>" . $row['Name'] . "</option>";
+                            echo "<option  value='$row[ID]'>" . $row['Name'] . "</option>";
                         }
                         echo "</select>";
+                        while($row1 = $result1->fetch_assoc()) {
+                            echo $row1['Description'] . "<br/><hr/>";
+                        }
                     }
 
                     $sqlRecipe = "SELECT * FROM recipe;";
@@ -52,7 +57,7 @@
                     $resultCheckRecipe = mysqli_num_rows($resultRecipe);
                     if($resultCheckRecipe > 0) {
                         while($row = mysqli_fetch_assoc($resultRecipe)) {
-                            echo $row['Name'] . "<br><br>" . $row['Description'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><br><hr/>";
+                            echo "<span='title'>" . $row['Name'] . "</span><br><br>" . $row['Description'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><hr/>";
                         }
                     }
                     
@@ -64,10 +69,6 @@
                             echo $row['Amount'] . " " . $row['Unit'] . " " . $row['Name'] . "<br><br>";
                         }
                     }
-                    
-                    //Join recipe & ingredients tables
-                    //Show Recipe Name, Description, Story / Ingredients Amount, Unit, Name
-
                 ?>
             </form>
         </div>
@@ -77,12 +78,30 @@
     $conn->close();
 ?>
 <style>
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        width: 70%;
+        margin-top: 25px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 25px;
+    }
+
     .selection {
-        margin: 0 auto 25px auto;
         width: 250px;
         height: 30px;
         display: block;
         font-size: 20px;
         text-align: center;
+        margin: 0 auto 25px auto;
+    }
+
+    .title {
+        text-align: center;
+    }
+
+    hr {
+        margin: 25px 0;
+        opacity: 25%;
     }
 </style>
