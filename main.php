@@ -65,12 +65,18 @@
                     $stmt->bind_param("i", $regionId);
                     $stmt->execute();
                     $resultRecipe = $stmt->get_result();
-                    print_r($resultRecipe);
                     $resultCheckRecipe = mysqli_num_rows($resultRecipe);
                     if($resultCheckRecipe > 0) {
+                        $recipes = [];
                         while($row = mysqli_fetch_assoc($resultRecipe)) {
-                            echo "<span='title'>" . $row['Name'] . "</span><br><br>" . $row['recipeDescription'] . "<br><br>" . $row['Life_Story'] . "<br><br>" . $row['Instructions'] . "<br><hr/>";
+                            $recipes[] = $row;
                         }
+
+                        echo '<p>' . $recipes[0]['regionDescription'] . '</p><hr>';
+
+                        foreach ($recipes as $recipe) {
+                            echo "<span='title'>" . $recipe['Name'] . "</span><br><br>" . $recipe['recipeDescription'] . "<br><br>" . $recipe['Life_Story'] . "<br><br>" . $recipe['Instructions'] . "<br><hr/>";
+                        } 
                     }
                     
                     $sqlIngredients = "SELECT * FROM ingredients;";
