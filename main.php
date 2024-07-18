@@ -4,48 +4,26 @@
             <form action="main.php" method="get">
                 <?php
                     include("connect.php");
-                    $conn = new mysqli("localhost", "root", "", "recipe");
-                    if ($conn->connect_error) {
-                        # Display an error mesage if the connection fails
-                        die("Connection failed: " . $conn->connect_error);
-                    }?>
-                <!--?php*
-                    $region = $conn->prepare("SELECT * FROM region");
-                    $region = $conn->prepare("INSERT INTO region (Name, Description) VALUES (?, ?, ?)");
-                    $region->bind_param("userregion", $Name, $Description);
+                    
+                    $dbconn = new DbConnect();
+                    $conn = $dbconn->getDbConnect();
 
-                    file_put_contents("./recipe.json", json_encode($region));
-                    //SELECT * FROM region WHERE Name = filtered name
-                    $regionResult = $db("SELECT DISTINCT Region FROM Recipe ORDER BY Name ASC");
-                    //$sql = "SELECT * FROM region;";
-                    ?>
-                -->
-                    <!-- <div class="search-box">
-                        <select id="region" name="region[]">
-                            <option value="0" selected="selected">Select region</option>
-                            <x?php
-                                if (! empty($regionResult)) {
-                                     foreach ($regionResult as $key => $value) {
-                                         echo '<option value="' . $regionResult[$key]['Region'] . '">' . $regionResult[$key]['Region'] . '</option>';
-                                     }
-                                 }
-                            ?>
-                        </select>
-                        <button id="filter">Search</button>
-                    </div> -->
-                <?php
                     if(isset($_GET["selectRegion"])) {
                         $regionId = $_GET["selectRegion"];
                     } else {
                         $regionId = 0;
                     }
-
+                    //Prepared statement binding class
                     $stmt = $conn->prepare("INSERT INTO region (ID, Name, Description) VALUES (?, ?, ?)");
                     $stmt->bind_param("iss", $ID, $Name, $Description);
-                    
+                    //SQL query class
+                    class prepareStatement{
+                        function getPrepareStatement() {
+                        }
+                    }
+
                     $sql = "SELECT * FROM region;";
                     $result = $conn->query($sql);
-                    $result1 = $conn->query($sql);
                     $resultCheck = mysqli_num_rows($result);
                     if($resultCheck > 0) {
                         echo "<select class='selection' name='selectRegion'>";
@@ -55,13 +33,16 @@
                             echo ">" . $row['Name'] . "</option>";
                         }
                         echo "</select>";
-                        echo "<input type='submit' value='submit'>";
-                       /*  while($row1 = $result1->fetch_assoc()) {
-                            echo $row1['Description'] . "<br/><hr/>";
-                        } */
+                        echo "<input type='submit' value='Submit' class='submit'>";
                     }
 
-                    $stmt = $conn->prepare("SELECT region.Description AS regionDescription, recipe.Name, recipe.Description AS recipeDescription, recipe.Instructions, recipe.Life_Story FROM recipe JOIN region ON recipe.regionId = region.ID WHERE regionId = ?");
+                    $stmt = $conn->prepare
+                        ("SELECT region.Description AS regionDescription, recipe.Name, recipe.Description
+                        AS recipeDescription, recipe.Instructions, recipe.Life_Story,
+                        ingredientlist.Ingredients AS ingredientList
+                        FROM ingredientlist JOIN recipe ON ingredientlist.recipeId = recipe.ID
+                        JOIN region ON recipe.regionId = region.ID
+                        WHERE regionId = ?");
                     $stmt->bind_param("i", $regionId);
                     $stmt->execute();
                     $resultRecipe = $stmt->get_result();
@@ -72,20 +53,12 @@
                             $recipes[] = $row;
                         }
 
-                        echo '<p>' . $recipes[0]['regionDescription'] . '</p><hr>';
+                        echo '<p class="description">' . $recipes[0]['regionDescription'] . '</p><hr>';
 
                         foreach ($recipes as $recipe) {
-                            echo "<span='title'>" . $recipe['Name'] . "</span><br><br>" . $recipe['recipeDescription'] . "<br><br>" . $recipe['Life_Story'] . "<br><br>" . $recipe['Instructions'] . "<br><hr/>";
-                        } 
-                    }
-                    
-                    $sqlIngredients = "SELECT * FROM ingredients;";
-                    $resultIngredients = mysqli_query($conn, $sqlIngredients);
-                    $resultCheckIngredients = mysqli_num_rows($resultIngredients);
-                    if($resultCheckIngredients > 0) {
-                        while($row = mysqli_fetch_assoc($resultIngredients)) {
-                            echo $row['Amount'] . " " . $row['Unit'] . " " . $row['Name'] . "<br><br>";
+                            echo "<span class='title'>" . $recipe['Name'] . "</span><br><br>" . $recipe['recipeDescription'] . "<br><br>" . $recipe['Life_Story'] . "<br><br>" . $recipe['ingredientList'] . "<br><br>" . $recipe['Instructions'] . "<br><hr/>";
                         }
+                    print_r($conn);
                     }
                 ?>
             </form>
@@ -114,7 +87,16 @@
         margin: 0 auto 25px auto;
     }
 
-    .title {
+    .submit {
+        width: 250px;
+        height: 30px;
+        display: block;
+        font-size: 20px;
+        text-align: center;
+        margin: 0 auto 25px auto;
+    }
+
+    .title, .description {
         text-align: center;
     }
 
